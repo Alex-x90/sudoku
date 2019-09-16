@@ -35,9 +35,22 @@ for j in range(9):
         if(exist[j][i]):
             values[i][j]=choice([i for i in range(0,9) if i not in checkList(j,i)])
 
-
 root=tkinter.Tk()
 root.title("Sudoku")
-for i in range(81):
-    globals()["E".join(i)] = #CONSTRUCT ENTRY
+
+entries = {}
+for j in range(9):
+    entries[j]= {}
+    for i in range(9):
+        entries[j][i] = Entry(root,width=1)
+        if values[math.floor(i/9)][math.floor(i%9)] is not None:
+            entries[j][i].insert(0,str(values[math.floor(i/9)][math.floor(i%9)]))
+            entries[j][i].configure(state="readonly")
+
+#ALL ENTRIES IN COLUMN ARE THE SAME
+
+for j in range(9):
+    for i in range(9):
+        entries[j][i].grid(row=j,column=i)
+
 root.mainloop()
