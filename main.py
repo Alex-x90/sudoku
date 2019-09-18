@@ -4,6 +4,48 @@ import math
 from random import randint
 from random import choice
 
+class myApp(tk.Tk):                                             #exist and entries aren't defined
+    def __init__(self,*args,**kwargs):
+        tk.Tk.__init__(self,*args,**kwargs)
+        exist = [[0 for i in range(9)] for j in range(9)]
+        entries = {}
+        temp = [[randint(0,9) for i in range(9)] for j in range(9)]
+        for j,row in enumerate(temp):
+            entries[j]= {}
+            for i,col in enumerate(row):
+                if(col<4):
+                    exist[j][i]=1
+                else:
+                    exist[j][i]=0
+                entries[j][i] = Lotfi(self,width=3)
+                entries[j][i].configure(font=(20))
+                if(exist[j][i]):
+                    entries[j][i].insert(0,str(choice([k for k in range(9) if k not in self.checkList(j,i)])))
+                    entries[j][i].configure(state="readonly")
+                entries[j][i].grid(row=j,column=i)
+
+    #Returns an array of all values that would be in same "group" as the given coordinate
+    def checkList(self,row,col):
+        output=[]
+        for x in range(9):
+            if entries[row][x].get() != None:
+                output.append(entries[row][x].get())
+            if entries[x][col].get() != None:
+                output.append(entries[x][col].get())
+            if entries[math.floor(row/3)*3+math.floor(x/3)][math.floor(col/3)*3+math.floor(x%3)].get() != None:
+                output.append(entries[math.floor(row/3)*3+math.floor(x/3)][math.floor(col/3)*3+math.floor(x%3)].get())
+        return output
+
+    #Clears all entries
+    def clear(self):
+        for j in range(9):
+            for i in range(9):
+                if exist[j][i] != 1:
+                    entries[j][i].delete(0,END)
+    #Checks if you've won
+    def win():
+        print("test")
+
 class Lotfi(tk.Entry):
     def __init__(self, master=None, **kwargs):
         self.var = tk.StringVar()
@@ -23,49 +65,13 @@ class Lotfi(tk.Entry):
             self.set(self.old_value)
         if len(self.get())>1 : self.set(self.get()[:1])
 
-def checkList(row,col):
-    output=[]
-    for x in range(9):
-        if values[row][x] != None:
-            output.append(values[row][x])
-        if values[x][col] != None:
-            output.append(values[x][col])
-        if values[math.floor(row/3)*3+math.floor(x/3)][math.floor(col/3)*3+math.floor(x%3)] != None:
-            output.append(values[math.floor(row/3)*3+math.floor(x/3)][math.floor(col/3)*3+math.floor(x%3)])
-    return output
+app=myApp()
+app.title("Sudoku")
 
-temp = [[randint(0,9) for i in range(9)] for j in range(9)]
-exist = [[0 for i in range(9)] for j in range(9)]
+b1 = Button(root,text="Clear",command=myApp.clear)
+b2 = Button(root,text="Win check",command=myApp.win)
 
-for j,row in enumerate(temp):
-    for i,col in enumerate(row):
-        if(col<4):
-            exist[j][i]=1
-        else:
-            exist[j][i]=0
+b1.grid(row=9,column=2,columnspan=2,sticky=E)
+b2.grid(row=9,column=5,columnspan=2,sticky=E)
 
-values = [[None for i in range(9)] for j in range(9)]
-
-for j in range(9):
-    for i in range(9):
-        if(exist[j][i]):
-            values[j][i]=choice([k for k in range(9) if k not in checkList(j,i)])
-
-root=tk.Tk()
-root.title("Sudoku")
-
-entries = {}
-for j in range(9):
-    entries[j]= {}
-    for i in range(9):
-        entries[j][i] = Lotfi(root,width=3)
-        if values[j][i] is not None:
-            entries[j][i].insert(0,str(values[j][i]))
-            entries[j][i].configure(state="readonly")
-        entries[j][i].configure(font=(20))
-
-for j in range(9):
-    for i in range(9):
-        entries[j][i].grid(row=j,column=i)
-
-root.mainloop()
+app.mainloop()
