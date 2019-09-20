@@ -4,9 +4,8 @@ import math
 from random import randint
 from random import choice
 
-#status message chaging unfinished
 #win check not finished
-#buttons don't align properly
+#self.checkList doesnt work
 
 class myApp(tk.Tk):
     def __init__(self,*args,**kwargs):
@@ -30,26 +29,25 @@ class myApp(tk.Tk):
                     self.entries[j][i].insert(0,str(choice([k for k in range(9) if k not in self.checkList(j,i)])))
                     self.entries[j][i].configure(state="readonly")
                 self.entries[j][i].grid(row=j,column=i)
+        self.labelText = StringVar()
         b1 = Button(self,text="Clear",command=self.clear)
-        b2 = Button(self,text="Win check",command=self.win,width=7)
-        l = Label(self,text="Status: Incomplete")
+        b2 = Button(self,text="Win check",width=7,compound=CENTER,command=self.win)
+        l = Label(self,textvariable=self.labelText)
         b1.grid(row=9,column=5,columnspan=2,sticky=E)
-        b2.grid(row=9,column=7,columnspan=2)
-        l.grid(row=9,column=0,columnspan=4)
+        b2.grid(row=9,column=7,columnspan=2,ipadx=1,sticky=E)
+        l.grid(row=9,column=0,columnspan=4,sticky=W)
+        self.labelText.set("Status: Incomplete")
     #Returns an array of all values that would be in same "group" as the given coordinate
     def checkList(self,row,col):
         output=[]
         for x in range(9):
-            if self.entries[row][x].get() != None:
+            if self.entries[row][x].get() != "":
                 output.append(self.entries[row][x].get())
-            if self.entries[x][col].get() != None:
+            if self.entries[x][col].get() != "":
                 output.append(self.entries[x][col].get())
-            if self.entries[math.floor(row/3)*3+math.floor(x/3)][math.floor(col/3)*3+math.floor(x%3)].get() != None:
+            if self.entries[math.floor(row/3)*3+math.floor(x/3)][math.floor(col/3)*3+math.floor(x%3)].get() != "":
                 output.append(self.entries[math.floor(row/3)*3+math.floor(x/3)][math.floor(col/3)*3+math.floor(x%3)].get())
         return output
-
-    #changes status message
-    def setStatus(self):
 
     #Clears all entries
     def clear(self):
