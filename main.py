@@ -5,7 +5,6 @@ from random import randint
 from random import choice
 
 #win check not finished
-#self.checkList doesnt work
 
 class myApp(tk.Tk):
     def __init__(self,*args,**kwargs):
@@ -26,7 +25,13 @@ class myApp(tk.Tk):
         for j in range(9):
             for i in range(9):
                 if(self.exist[j][i]):
-                    self.entries[j][i].insert(0,str(choice([k for k in range(9) if k not in self.checkList(j,i)])))
+                    temp = []
+                    for x in range(9):
+                        temp.append(str(x))
+                    try:
+                        self.entries[j][i].insert(0,str(choice([k for k in temp if k not in self.checkList(j,i)])))
+                    except:
+                        self.entries[j][i].insert(0,"")
                     self.entries[j][i].configure(state="readonly")
                 self.entries[j][i].grid(row=j,column=i)
         self.labelText = StringVar()
