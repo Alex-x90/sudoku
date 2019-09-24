@@ -4,7 +4,7 @@ import math
 from random import randint
 from random import choice
 
-#win check not finished
+#Generation can still generate unsolvable puzzles
 
 class myApp(tk.Tk):
     def __init__(self,*args,**kwargs):
@@ -26,7 +26,7 @@ class myApp(tk.Tk):
             for i in range(9):
                 if(self.exist[j][i]):
                     temp = []
-                    for x in range(9):
+                    for x in range(1,10):
                         temp.append(str(x))
                     try:
                         self.entries[j][i].insert(0,str(choice([k for k in temp if k not in self.checkList(j,i)])))
@@ -41,7 +41,7 @@ class myApp(tk.Tk):
         b1.grid(row=9,column=5,columnspan=2,sticky=E)
         b2.grid(row=9,column=7,columnspan=2,ipadx=1,sticky=E)
         l.grid(row=9,column=0,columnspan=4,sticky=W)
-        self.labelText.set("Status: Incomplete")
+        self.setStatus("Incomplete")
     #Returns an array of all values that would be in same "group" as the given coordinate
     def checkList(self,row,col):
         output=[]
@@ -60,13 +60,35 @@ class myApp(tk.Tk):
             for i in range(9):
                 if self.exist[j][i] != 1:
                     self.entries[j][i].delete(0,END)
+    #Sets the status label
+    def setStatus(self,status):
+        self.labelText.set("Status: " + status)
     #Checks if you've won
     def win(self):
-        temp=False
         for j in range(9):
             for i in range(9):
                 if self.entries[j][i].get() == "":
-                    temp=True
+                    self.setStatus("Incomplete")
+                    return
+        for j in range(9):
+            for i in range(9):
+                if self.entries[j][i].get() == None:
+                    self.setStatus("Incomplete")
+                    return
+        for j in range(9):
+            for i in range(9):
+                for h in range(9):
+                    if self.entries[j][i].get() == self.entries[j][h].get():
+                        self.setStatus("Incorrect")
+                        return
+                    if self.entries[j][i].get() == self.entries[h][i].get():
+                        self.setStatus("Incorrect")
+                        return
+                    if self.entries[j][i].get() == self.entries[math.floor(j/3)*3+math.floor(h/3)][math.floor(i/3)*3+math.floor(h%3)].get():
+                        self.setStatus("Incorrect")
+                        return
+        self.setStatus("Complete")
+
 
 class Lotfi(tk.Entry):
     def __init__(self, master=None, **kwargs):
