@@ -1,10 +1,8 @@
 import tkinter as tk
+import requests, json,math
 from tkinter import *
-import math
-from random import randint
-from random import choice
-
-#Generation can still generate unsolvable puzzles
+from random import randint,choice
+# uses the api of the site http://www.cs.utep.edu/cheon/ws/sudoku/ to generate puzzles
 
 class myApp(tk.Tk):
     def __init__(self,*args,**kwargs):
@@ -12,28 +10,27 @@ class myApp(tk.Tk):
         self.title("Sudoku")
         self.entries = {}
         self.exist = [[0 for i in range(9)] for j in range(9)]
-        temp = [[randint(0,9) for i in range(9)] for j in range(9)]
-        for j,row in enumerate(temp):
+        #sends a request for a puzzle with a random difficulty between 1 and 3
+        board = requests.get(f"http://www.cs.utep.edu/cheon/ws/sudoku/new/?size=9&level={randint(1,3)}").json()
+        #generates spots to enter numbers
+        for j in range(9):
             self.entries[j]= {}
-            for i,col in enumerate(row):
-                if(col<4):
-                    self.exist[j][i]=1
-                else:
-                    self.exist[j][i]=0
+            for i in range(9):
                 self.entries[j][i] = Lotfi(self,width=3,borderwidth=1, relief="solid")
                 self.entries[j][i].configure(font=(20))
+
+        #adds starting values and makes them uneditable. stores which spots have values to make clearing the board easy
+        if(board["response"]):
+            for x in board["squares"]:
+                self.entries[x["x"]][x["y"]].insert(0,str(x["value"]))
+                self.exist[x["x"]][x["y"]]=1
+                self.entries[x["x"]][x["y"]].configure(state="readonly")
+
+        #places entry spots in a grid
         for j in range(9):
             for i in range(9):
-                if(self.exist[j][i]):
-                    temp = []
-                    for x in range(1,10):
-                        temp.append(str(x))
-                    try:
-                        self.entries[j][i].insert(0,str(choice([k for k in temp if k not in self.checkList(j,i)])))
-                    except:
-                        self.entries[j][i].insert(0,"")
-                    self.entries[j][i].configure(state="readonly")
                 self.entries[j][i].grid(row=j,column=i)
+
         self.labelText = StringVar()
         b1 = Button(self,text="Clear",command=self.clear)
         b2 = Button(self,text="Win check",width=7,compound=CENTER,command=self.win)
@@ -42,17 +39,6 @@ class myApp(tk.Tk):
         b2.grid(row=9,column=7,columnspan=2,ipadx=1,sticky=E)
         l.grid(row=9,column=0,columnspan=4,sticky=W)
         self.setStatus("Incomplete")
-    #Returns an array of all values that would be in same "group" as the given coordinate
-    def checkList(self,row,col):
-        output=[]
-        for x in range(9):
-            if self.entries[row][x].get() != "":
-                output.append(self.entries[row][x].get())
-            if self.entries[x][col].get() != "":
-                output.append(self.entries[x][col].get())
-            if self.entries[math.floor(row/3)*3+math.floor(x/3)][math.floor(col/3)*3+math.floor(x%3)].get() != "":
-                output.append(self.entries[math.floor(row/3)*3+math.floor(x/3)][math.floor(col/3)*3+math.floor(x%3)].get())
-        return output
 
     #Clears all entries
     def clear(self):
@@ -60,35 +46,31 @@ class myApp(tk.Tk):
             for i in range(9):
                 if self.exist[j][i] != 1:
                     self.entries[j][i].delete(0,END)
+
     #Sets the status label
     def setStatus(self,status):
         self.labelText.set("Status: " + status)
+
     #Checks if you've won
     def win(self):
         for j in range(9):
             for i in range(9):
-                if self.entries[j][i].get() == "":
-                    self.setStatus("Incomplete")
-                    return
-        for j in range(9):
-            for i in range(9):
-                if self.entries[j][i].get() == None:
+                if self.entries[j][i].get() == "" or self.entries[j][i].get() == None:
                     self.setStatus("Incomplete")
                     return
         for j in range(9):
             for i in range(9):
                 for h in range(9):
-                    if self.entries[j][i].get() == self.entries[j][h].get():
+                    if self.entries[j][i].get() == self.entries[j][h].get() and h!=i:
                         self.setStatus("Incorrect")
                         return
-                    if self.entries[j][i].get() == self.entries[h][i].get():
+                    if self.entries[j][i].get() == self.entries[h][i].get()and h!=j:
                         self.setStatus("Incorrect")
                         return
-                    if self.entries[j][i].get() == self.entries[math.floor(j/3)*3+math.floor(h/3)][math.floor(i/3)*3+math.floor(h%3)].get():
+                    if self.entries[j][i].get() == self.entries[math.floor(j/3)*3+math.floor(h/3)][math.floor(i/3)*3+math.floor(h%3)].get()and j!=math.floor(j/3)*3+math.floor(h/3)and i!=math.floor(i/3)*3+math.floor(h%3):
                         self.setStatus("Incorrect")
                         return
         self.setStatus("Complete")
-
 
 class Lotfi(tk.Entry):
     def __init__(self, master=None, **kwargs):
